@@ -1,7 +1,8 @@
+import { forwardRef } from "react";
 import type { ButtonHTMLAttributes } from "react";
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: "primary" | "secondary" | "ghost";
+  variant?: "primary" | "secondary" | "ghost" | "danger";
   size?: "md" | "lg";
 };
 
@@ -11,6 +12,7 @@ const baseStyles =
 const variantStyles = {
   primary: "bg-accent text-accent-foreground shadow-sm hover:bg-accent-hover",
   secondary: "border border-border bg-surface text-foreground hover:bg-muted/10",
+  danger: "bg-red-600 text-white shadow-sm hover:bg-red-700",
   ghost: "text-muted hover:bg-muted/10 hover:text-foreground",
 };
 
@@ -19,17 +21,20 @@ const sizeStyles = {
   lg: "h-10 px-5 text-sm",
 };
 
-export function Button({
-  variant = "primary",
-  size = "md",
-  className = "",
-  ...props
-}: ButtonProps) {
-  return (
-    <button
-      type="button"
-      className={`${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}
-      {...props}
-    />
-  );
-}
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+  (
+    { variant = "primary", size = "md", className = "", ...props },
+    ref
+  ) => {
+    return (
+      <button
+        ref={ref}
+        type="button"
+        className={`${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}
+        {...props}
+      />
+    );
+  }
+);
+
+Button.displayName = "Button";

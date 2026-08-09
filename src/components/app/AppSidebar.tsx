@@ -76,7 +76,7 @@ export function AppSidebar({ open, onClose }: AppSidebarProps) {
           </button>
         </div>
         <div className="px-3 pt-2">
-          <Button className="w-full">
+          <Button className="w-full" onClick={() => router.push("/notes/new")}>
             <IconPlus className="h-4 w-4" />
             New Note
           </Button>

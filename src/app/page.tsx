@@ -1,25 +1,139 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { AppShell } from "@/components/app/AppShell";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { NotesList } from "@/components/notes/NotesList";
 import { RequireAuth } from "@/components/auth/RequireAuth";
+import { getNotes } from "@/lib/api";
+import type { Note, NotesPagination } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
 import { IconNote, IconPlus } from "@/components/icons";
 
-export default function HomePage() {
-  return (
-    <RequireAuth>
+const PAGE_SIZE = 10;
+
+function DashboardContent() {
+  const router = useRouter();
+  const { token, logout } = useAuth();
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [pagination, setPagination] = useState<NotesPagination>({
+    page: 1,
+    limit: PAGE_SIZE,
+    total: 0,
+    totalPages: 1,
+  });
+  const [page, setPage] = useState(1);
+  const [reloadKey, setReloadKey] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!token) return;
+
+    let cancelled = false;
+
+    getNotes(token, page, PAGE_SIZE)
+      .then((result) => {
+        if (cancelled) return;
+        if (result.ok) {
+          setNotes(result.notes);
+          setPagination(result.pagination);
+          setError(null);
+        } else if (result.status === 401) {
+          logout();
+          router.replace("/login");
+        } else {
+          setError(result.message);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setError("Something went wrong. Please try again.");
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [token, page, reloadKey, logout, router]);
+
+  const handlePageChange = (nextPage: number) => {
+    setPage(nextPage);
+    setLoading(true);
+  };
+
+  const handleRetry = () => {
+    setError(null);
+    setLoading(true);
+    setReloadKey((key) => key + 1);
+  };
+
+  if (loading) {
+    return (
+      <AppShell>
+        <div className="flex min-h-[50vh] items-center justify-center">
+          <p className="text-sm text-muted">Loading notes...</p>
+        </div>
+      </AppShell>
+    );
+  }
+
+  if (error) {
+    return (
+      <AppShell>
+        <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4 px-6 text-center">
+          <p className="text-sm text-muted">{error}</p>
+          <Button variant="secondary" onClick={handleRetry}>
+            Try again
+          </Button>
+        </div>
+      </AppShell>
+    );
+  }
+
+  if (notes.length === 0) {
+    return (
       <AppShell>
         <EmptyState
           icon={<IconNote className="h-6 w-6 text-muted" />}
           title="No notes yet"
           description="Create your first note to get started."
           action={
-            <Button>
+            <Button onClick={() => router.push("/notes/new")}>
               <IconPlus className="h-4 w-4" />
               New Note
             </Button>
           }
         />
       </AppShell>
+    );
+  }
+
+  return (
+    <AppShell>
+      <div className="mx-auto w-full max-w-3xl px-4 py-8 md:px-8">
+        <NotesList
+          notes={notes}
+          pagination={pagination}
+          currentPage={page}
+          onPageChange={handlePageChange}
+        />
+      </div>
+    </AppShell>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <RequireAuth>
+      <DashboardContent />
     </RequireAuth>
   );
 }
