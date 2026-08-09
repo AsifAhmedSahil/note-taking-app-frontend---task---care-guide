@@ -2,6 +2,7 @@
 
 @theme inline {
   --color-background: var(--background);
+  --color-sidebar: var(--sidebar);
   --color-surface: var(--surface);
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
@@ -13,14 +14,19 @@
   --font-mono: var(--font-geist-mono);
   --radius-control: 10px;
   --radius-surface: 12px;
+  --shadow-card: 0 1px 2px 0 rgb(28 25 23 / 0.04),
+    0 2px 8px -1px rgb(28 25 23 / 0.06);
+  --shadow-card-hover: 0 4px 12px -2px rgb(28 25 23 / 0.08),
+    0 12px 24px -6px rgb(28 25 23 / 0.12);
 }
 
 :root {
-  --background: #f6f7f9;
-  --surface: #ffffff;
-  --foreground: #1a1d21;
-  --muted: #6b7280;
-  --border: #e5e7eb;
+  --background: #f5f1e8;
+  --sidebar: #f0ece2;
+  --surface: #fbfaf7;
+  --foreground: #242424;
+  --muted: #737373;
+  --border: #ded8cc;
   --accent: #4f46e5;
   --accent-hover: #4338ca;
   --accent-foreground: #ffffff;

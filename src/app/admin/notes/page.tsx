@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useCallback, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { AppShell } from "@/components/app/AppShell";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -23,6 +23,8 @@ type ViewState =
 
 function AdminNotesContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const search = searchParams.get("search") ?? "";
   const { token, logout } = useAuth();
   const [view, setView] = useState<ViewState>({ kind: "loading" });
   const [notes, setNotes] = useState<AdminNote[]>([]);
@@ -34,6 +36,13 @@ function AdminNotesContent() {
   });
   const [page, setPage] = useState(1);
   const [reloadKey, setReloadKey] = useState(0);
+  const [prevSearch, setPrevSearch] = useState(search);
+
+  if (prevSearch !== search) {
+    setPrevSearch(search);
+    setPage(1);
+    setView({ kind: "loading" });
+  }
 
   const handleUnauthorized = useCallback(() => {
     logout();
@@ -52,7 +61,7 @@ function AdminNotesContent() {
     if (!token) return;
     let cancelled = false;
 
-    getAdminNotes(token, page, PAGE_SIZE)
+    getAdminNotes(token, page, PAGE_SIZE, search)
       .then((result) => {
         if (cancelled) return;
         if (result.ok) {
@@ -79,7 +88,7 @@ function AdminNotesContent() {
     return () => {
       cancelled = true;
     };
-  }, [token, page, reloadKey, handleUnauthorized]);
+  }, [token, page, search, reloadKey, handleUnauthorized]);
 
   const retry = () => {
     setView({ kind: "loading" });
@@ -89,6 +98,10 @@ function AdminNotesContent() {
   const handlePageChange = (nextPage: number) => {
     setView({ kind: "loading" });
     setPage(nextPage);
+  };
+
+  const clearSearch = () => {
+    router.replace("/admin/notes");
   };
 
   if (view.kind === "loading") {
@@ -136,28 +149,46 @@ function AdminNotesContent() {
 
   return (
     <AppShell>
-      <div className="mx-auto w-full max-w-4xl px-4 py-8 md:px-8">
+      <div className="mx-auto w-full max-w-6xl px-4 py-8 md:px-8">
         <Button variant="ghost" onClick={handleBack}>
           ← Back
         </Button>
         <div className="mt-4 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="text-xl font-semibold tracking-tight text-foreground">
-              Notes
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+              {search.trim() ? `Search results for "${search.trim()}"` : "Notes"}
             </h1>
-            <p className="mt-1 text-sm text-muted">All notes across the application</p>
+            <p className="mt-1.5 text-sm text-muted">All notes across the application</p>
           </div>
-          <p className="text-sm text-muted">
-            {pagination.total} {pagination.total === 1 ? "note" : "notes"}
-          </p>
+          <div className="flex flex-wrap items-center gap-4">
+            <p className="text-sm text-muted">
+              {pagination.total} {pagination.total === 1 ? "note" : "notes"}
+            </p>
+            {search.trim() ? (
+              <Button variant="secondary" onClick={clearSearch}>
+                Clear search
+              </Button>
+            ) : null}
+          </div>
         </div>
 
         <div className="mt-6">
           {view.kind === "empty" ? (
             <EmptyState
               icon={<IconNote className="h-6 w-6 text-muted" />}
-              title="No notes yet"
-              description="There are no notes to display."
+              title={search.trim() ? "No notes found" : "No notes yet"}
+              description={
+                search.trim()
+                  ? `No notes match "${search.trim()}". Try a different search.`
+                  : "There are no notes to display."
+              }
+              action={
+                search.trim() ? (
+                  <Button variant="secondary" onClick={clearSearch}>
+                    Clear search
+                  </Button>
+                ) : undefined
+              }
             />
           ) : (
             <AdminNotesList
@@ -176,7 +207,9 @@ function AdminNotesContent() {
 export default function AdminNotesPage() {
   return (
     <RequireAuth>
-      <AdminNotesContent />
+      <Suspense fallback={null}>
+        <AdminNotesContent />
+      </Suspense>
     </RequireAuth>
   );
 }

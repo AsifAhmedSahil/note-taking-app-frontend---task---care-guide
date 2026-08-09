@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/Button";
 import type { AdminNote, NotesPagination } from "@/lib/api";
+import { getNoteColor } from "@/lib/noteColors";
 
 type AdminNotesListProps = {
   notes: AdminNote[];
@@ -16,11 +17,31 @@ function formatDate(value: string) {
   });
 }
 
-function OwnerName({ note }: { note: AdminNote }) {
+function initials(name: string) {
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part.charAt(0).toUpperCase())
+    .join("");
+}
+
+function OwnerBadge({ note }: { note: AdminNote }) {
+  const name = note.owner?.name ?? "Unknown";
   return (
-    <span className="block max-w-40 truncate font-medium text-foreground">
-      {note.owner?.name ?? "Unknown"}
-    </span>
+    <div className="flex min-w-0 items-center gap-2.5">
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-accent/10 text-xs font-medium text-accent">
+        {initials(name)}
+      </span>
+      <span className="min-w-0">
+        <span className="block truncate text-sm font-medium text-foreground">
+          {name}
+        </span>
+        <span className="block truncate text-xs text-muted">
+          {note.owner?.email ?? "—"}
+        </span>
+      </span>
+    </div>
   );
 }
 
@@ -35,73 +56,30 @@ export function AdminNotesList({
 
   return (
     <div>
-      <div className="hidden overflow-hidden rounded-surface border border-border bg-surface shadow-sm md:block">
-        <table className="w-full text-left text-sm">
-          <thead>
-            <tr className="border-b border-border text-xs uppercase tracking-wide text-muted">
-              <th scope="col" className="px-5 py-3 font-medium">
-                Title
-              </th>
-              <th scope="col" className="px-5 py-3 font-medium">
-                Owner
-              </th>
-              <th scope="col" className="px-5 py-3 font-medium">
-                Owner email
-              </th>
-              <th scope="col" className="px-5 py-3 font-medium">
-                Created
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">
-            {notes.map((note) => (
-              <tr key={note.id} className="hover:bg-muted/5">
-                <td className="max-w-72 px-5 py-3">
-                  <span className="block truncate font-medium text-foreground">
-                    {note.title}
-                  </span>
-                  <span className="mt-0.5 block line-clamp-1 text-muted">
-                    {note.content}
-                  </span>
-                </td>
-                <td className="px-5 py-3">
-                  <OwnerName note={note} />
-                </td>
-                <td className="max-w-52 truncate px-5 py-3 text-muted">
-                  {note.owner?.email ?? "—"}
-                </td>
-                <td className="whitespace-nowrap px-5 py-3 text-muted">
-                  {formatDate(note.createdAt)}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      <div className="flex flex-col gap-3 md:hidden">
-        {notes.map((note) => (
-          <div
-            key={note.id}
-            className="rounded-surface border border-border bg-surface p-4 shadow-sm"
-          >
-            <p className="truncate text-sm font-semibold text-foreground">
-              {note.title}
-            </p>
-            <p className="mt-1 line-clamp-2 text-sm text-muted">{note.content}</p>
-            <div className="mt-3 border-t border-border pt-3">
-              <p className="truncate text-sm font-medium text-foreground">
-                {note.owner?.name ?? "Unknown"}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {notes.map((note) => {
+          const color = getNoteColor(note.id);
+          return (
+            <div
+              key={note.id}
+              style={{ backgroundColor: color.bg, borderColor: color.border }}
+              className="flex flex-col gap-3 rounded-[16px] border p-5 shadow-card transition-all duration-200 hover:-translate-y-0.5 hover:shadow-card-hover"
+            >
+              <h2 className="line-clamp-2 text-base font-semibold leading-snug tracking-tight text-foreground">
+                {note.title}
+              </h2>
+              <p className="line-clamp-3 flex-1 break-words text-sm leading-relaxed text-muted">
+                {note.content}
               </p>
-              <p className="truncate text-sm text-muted">
-                {note.owner?.email ?? "—"}
-              </p>
-              <p className="mt-1 text-xs text-muted">
-                Created {formatDate(note.createdAt)}
-              </p>
+              <div className="border-t border-border/60 pt-3">
+                <OwnerBadge note={note} />
+                <p className="mt-2 text-xs text-muted">
+                  Created {formatDate(note.createdAt)}
+                </p>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {pagination.totalPages > 1 ? (

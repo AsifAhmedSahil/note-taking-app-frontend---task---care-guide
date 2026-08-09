@@ -28,7 +28,7 @@ function NavItem({ icon, label, active = false, onClick }: NavItemProps) {
       onClick={onClick}
       className={`flex w-full items-center gap-3 rounded-control px-3 py-2 text-sm font-medium transition-colors ${
         active
-          ? "bg-muted/10 text-foreground"
+          ? "bg-accent/10 text-accent"
           : "text-muted hover:bg-muted/10 hover:text-foreground"
       }`}
     >
@@ -87,7 +87,7 @@ export function AppSidebar({ open, onClose }: AppSidebarProps) {
         />
       ) : null}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-border bg-surface transition-transform duration-200 ease-in-out md:static md:z-auto md:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-border bg-sidebar transition-transform duration-200 ease-in-out md:static md:z-auto md:translate-x-0 ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -117,7 +117,7 @@ export function AppSidebar({ open, onClose }: AppSidebarProps) {
           />
           {user?.role === "admin" ? (
             <>
-              <p className="px-3 pb-1 pt-4 text-xs font-medium text-muted">
+              <p className="px-3 pb-1 pt-4 text-xs font-medium uppercase tracking-wide text-muted/80">
                 Admin
               </p>
               <NavItem

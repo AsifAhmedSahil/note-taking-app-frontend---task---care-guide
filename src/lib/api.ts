@@ -80,11 +80,20 @@ type AdminNotesResponsePayload = {
 export async function getAdminNotes(
   token: string,
   page = 1,
-  limit = 10
+  limit = 10,
+  search = ""
 ): Promise<GetAdminNotesResult> {
+  const params = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+  });
+  if (search.trim()) {
+    params.set("search", search.trim());
+  }
+
   let response: Response;
   try {
-    response = await fetch(`/api/admin/notes?page=${page}&limit=${limit}`, {
+    response = await fetch(`/api/admin/notes?${params.toString()}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
   } catch {

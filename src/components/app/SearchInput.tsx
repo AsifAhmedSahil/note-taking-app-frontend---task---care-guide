@@ -78,7 +78,7 @@ export function SearchInput() {
         value={value}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
-        className="h-9 w-56 rounded-control border border-border bg-background pl-9 pr-9 text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent/30"
+        className="h-9 w-56 rounded-control border border-border bg-sidebar pl-9 pr-9 text-sm text-foreground placeholder:text-muted transition-colors focus:bg-surface focus:border-accent/40 focus:outline-none focus:ring-2 focus:ring-accent/25"
       />
       {value ? (
         <button
