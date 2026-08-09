@@ -28,6 +28,13 @@ Frontend for a secure note-taking application built with Next.js. The applicatio
 * Tailwind CSS v4
 * Next.js App Router
 
+## Demo Credentials
+
+| Role  | Email                | Password    |
+| ----- | -------------------- | ----------- |
+| User  | `asif.test@example.com` | `Test@12345` |
+| Admin | `admin2@example.com` | `Admin@12345` |
+
 ## Setup
 
 Install dependencies:
@@ -175,12 +182,7 @@ Available admin sections:
 
 Frontend role checks only control the user interface. The backend remains responsible for enforcing admin authorization.
 
-## Demo Credentials
 
-| Role  | Email                | Password    |
-| ----- | -------------------- | ----------- |
-| User  | `asif.test@example.com` | `Test@12345` |
-| Admin | `admin2@example.com` | `Admin@12345` |
 
 ## UI
 
