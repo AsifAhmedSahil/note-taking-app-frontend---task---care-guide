@@ -205,7 +205,7 @@ export function NoteDetail({ noteId }: NoteDetailProps) {
               })}
             </time>
             <div className="mt-6 border-b border-border" />
-            <p className="mt-6 whitespace-pre-wrap text-sm leading-relaxed text-foreground">
+            <p className="mt-6 whitespace-pre-wrap break-words text-sm leading-relaxed text-foreground">
               {note.content}
             </p>
           </article>

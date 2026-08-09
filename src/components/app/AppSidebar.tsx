@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Logo } from "@/components/ui/Logo";
@@ -52,6 +53,19 @@ export function AppSidebar({ open, onClose }: AppSidebarProps) {
   const isAdminUsersActive = pathname === "/admin/users";
   const isAdminNotesActive = pathname === "/admin/notes";
   const isAdminInterestsActive = pathname === "/admin/interests";
+
+  useEffect(() => {
+    if (!open) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [open, onClose]);
 
   const handleNavigate = (href: string) => {
     router.push(href);

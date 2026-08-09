@@ -15,7 +15,7 @@ export function NotesPagination({
   const isLast = currentPage >= totalPages;
 
   return (
-    <div className="mt-6 flex items-center justify-center gap-4">
+    <div className="mt-6 flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
       <Button
         variant="secondary"
         size="md"
