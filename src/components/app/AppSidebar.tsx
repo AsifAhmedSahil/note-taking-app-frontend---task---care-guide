@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Logo } from "@/components/ui/Logo";
 import { useAuth } from "@/lib/auth";
@@ -10,6 +10,7 @@ import {
   IconNote,
   IconPlus,
   IconSettings,
+  IconUser,
 } from "@/components/icons";
 
 type NavItemProps = {
@@ -43,7 +44,19 @@ type AppSidebarProps = {
 
 export function AppSidebar({ open, onClose }: AppSidebarProps) {
   const router = useRouter();
-  const { logout } = useAuth();
+  const pathname = usePathname();
+  const { user, logout } = useAuth();
+
+  const isNotesActive = pathname === "/" || pathname.startsWith("/notes");
+  const isSettingsActive = pathname === "/settings";
+  const isAdminUsersActive = pathname === "/admin/users";
+  const isAdminNotesActive = pathname === "/admin/notes";
+  const isAdminInterestsActive = pathname === "/admin/interests";
+
+  const handleNavigate = (href: string) => {
+    router.push(href);
+    onClose();
+  };
 
   const handleLogout = () => {
     logout();
@@ -85,13 +98,41 @@ export function AppSidebar({ open, onClose }: AppSidebarProps) {
           <NavItem
             icon={<IconNote className="h-4 w-4" />}
             label="All Notes"
-            active
+            active={isNotesActive}
+            onClick={() => handleNavigate("/")}
           />
+          {user?.role === "admin" ? (
+            <>
+              <p className="px-3 pb-1 pt-4 text-xs font-medium text-muted">
+                Admin
+              </p>
+              <NavItem
+                icon={<IconNote className="h-4 w-4" />}
+                label="Notes"
+                active={isAdminNotesActive}
+                onClick={() => handleNavigate("/admin/notes")}
+              />
+              <NavItem
+                icon={<IconUser className="h-4 w-4" />}
+                label="Users"
+                active={isAdminUsersActive}
+                onClick={() => handleNavigate("/admin/users")}
+              />
+              <NavItem
+                icon={<IconUser className="h-4 w-4" />}
+                label="Interests"
+                active={isAdminInterestsActive}
+                onClick={() => handleNavigate("/admin/interests")}
+              />
+            </>
+          ) : null}
         </nav>
         <div className="flex flex-col gap-1 border-t border-border px-3 py-4">
           <NavItem
             icon={<IconSettings className="h-4 w-4" />}
             label="Settings"
+            active={isSettingsActive}
+            onClick={() => handleNavigate("/settings")}
           />
           <NavItem
             icon={<IconLogout className="h-4 w-4" />}

@@ -53,6 +53,311 @@ async function postAuth(
   return { ok: false, message };
 }
 
+export type AdminNote = {
+  id: string;
+  title: string;
+  content: string;
+  owner: {
+    _id?: string;
+    name: string;
+    email: string;
+  } | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type GetAdminNotesResult =
+  | { ok: true; notes: AdminNote[]; pagination: NotesPagination }
+  | { ok: false; status: number; message: string };
+
+type AdminNotesResponsePayload = {
+  success: boolean;
+  data?: AdminNote[];
+  pagination?: NotesPagination;
+  message?: string;
+};
+
+export async function getAdminNotes(
+  token: string,
+  page = 1,
+  limit = 10
+): Promise<GetAdminNotesResult> {
+  let response: Response;
+  try {
+    response = await fetch(`/api/admin/notes?page=${page}&limit=${limit}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  } catch {
+    return {
+      ok: false,
+      status: 0,
+      message: "Could not connect to the server. Please try again.",
+    };
+  }
+
+  const payload = (await response.json().catch(() => null)) as
+    | AdminNotesResponsePayload
+    | null;
+
+  if (
+    response.ok &&
+    payload?.success &&
+    Array.isArray(payload.data) &&
+    payload.pagination
+  ) {
+    return { ok: true, notes: payload.data, pagination: payload.pagination };
+  }
+
+  const message =
+    typeof payload?.message === "string" && payload.message.length > 0
+      ? payload.message
+      : "Something went wrong. Please try again.";
+
+  return { ok: false, status: response.status, message };
+}
+
+export type AdminUser = {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  interests: string[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type UsersPagination = {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+};
+
+export type GetUsersResult =
+  | { ok: true; users: AdminUser[]; pagination: UsersPagination }
+  | { ok: false; status: number; message: string };
+
+type UsersResponsePayload = {
+  success: boolean;
+  data?: AdminUser[];
+  pagination?: UsersPagination;
+  message?: string;
+};
+
+export async function getUsers(
+  token: string,
+  page = 1,
+  limit = 10
+): Promise<GetUsersResult> {
+  let response: Response;
+  try {
+    response = await fetch(`/api/users?page=${page}&limit=${limit}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  } catch {
+    return {
+      ok: false,
+      status: 0,
+      message: "Could not connect to the server. Please try again.",
+    };
+  }
+
+  const payload = (await response.json().catch(() => null)) as
+    | UsersResponsePayload
+    | null;
+
+  if (
+    response.ok &&
+    payload?.success &&
+    Array.isArray(payload.data) &&
+    payload.pagination
+  ) {
+    return { ok: true, users: payload.data, pagination: payload.pagination };
+  }
+
+  const message =
+    typeof payload?.message === "string" && payload.message.length > 0
+      ? payload.message
+      : "Something went wrong. Please try again.";
+
+  return { ok: false, status: response.status, message };
+}
+
+export type InterestUser = {
+  id: string;
+  name: string;
+};
+
+export type InterestGroup = {
+  interest: string;
+  count: number;
+  users: InterestUser[];
+};
+
+export type GetInterestGroupsResult =
+  | { ok: true; groups: InterestGroup[] }
+  | { ok: false; status: number; message: string };
+
+type InterestGroupsResponsePayload = {
+  success: boolean;
+  data?: InterestGroup[];
+  message?: string;
+};
+
+export async function getInterestGroups(
+  token: string
+): Promise<GetInterestGroupsResult> {
+  let response: Response;
+  try {
+    response = await fetch("/api/users/interests", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  } catch {
+    return {
+      ok: false,
+      status: 0,
+      message: "Could not connect to the server. Please try again.",
+    };
+  }
+
+  const payload = (await response.json().catch(() => null)) as
+    | InterestGroupsResponsePayload
+    | null;
+
+  if (response.ok && payload?.success && Array.isArray(payload.data)) {
+    return { ok: true, groups: payload.data };
+  }
+
+  const message =
+    typeof payload?.message === "string" && payload.message.length > 0
+      ? payload.message
+      : "Something went wrong. Please try again.";
+
+  return { ok: false, status: response.status, message };
+}
+
+export type UserInput = {
+  name: string;
+  email: string;
+  role: string;
+  interests: string[];
+  password?: string;
+};
+
+export type UserResult =
+  | { ok: true; user: AdminUser }
+  | { ok: false; status: number; message: string };
+
+type UserResponsePayload = {
+  success: boolean;
+  user?: AdminUser;
+  message?: string;
+};
+
+async function requestUser(
+  method: string,
+  token: string,
+  path: string,
+  body?: Record<string, unknown>
+): Promise<UserResult> {
+  let response: Response;
+  try {
+    response = await fetch(path, {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: body ? JSON.stringify(body) : undefined,
+    });
+  } catch {
+    return {
+      ok: false,
+      status: 0,
+      message: "Could not connect to the server. Please try again.",
+    };
+  }
+
+  const payload = (await response.json().catch(() => null)) as
+    | UserResponsePayload
+    | null;
+
+  if (response.ok && payload?.success && payload.user) {
+    return { ok: true, user: payload.user };
+  }
+
+  const message =
+    typeof payload?.message === "string" && payload.message.length > 0
+      ? payload.message
+      : "Something went wrong. Please try again.";
+
+  return { ok: false, status: response.status, message };
+}
+
+export function createUser(token: string, input: UserInput) {
+  const body: Record<string, unknown> = {
+    name: input.name,
+    email: input.email,
+    role: input.role,
+    interests: input.interests,
+  };
+  if (input.password) {
+    body.password = input.password;
+  }
+  return requestUser("POST", token, "/api/users", body);
+}
+
+export function updateUser(token: string, id: string, input: UserInput) {
+  const body: Record<string, unknown> = {
+    name: input.name,
+    email: input.email,
+    role: input.role,
+    interests: input.interests,
+  };
+  if (input.password) {
+    body.password = input.password;
+  }
+  return requestUser("PATCH", token, `/api/users/${id}`, body);
+}
+
+export type DeleteUserResult =
+  | { ok: true }
+  | { ok: false; status: number; message: string };
+
+export async function deleteUser(
+  token: string,
+  id: string
+): Promise<DeleteUserResult> {
+  let response: Response;
+  try {
+    response = await fetch(`/api/users/${id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  } catch {
+    return {
+      ok: false,
+      status: 0,
+      message: "Could not connect to the server. Please try again.",
+    };
+  }
+
+  const payload = (await response.json().catch(() => null)) as
+    | DeleteResponsePayload
+    | null;
+
+  if (response.ok && payload?.success) {
+    return { ok: true };
+  }
+
+  const message =
+    typeof payload?.message === "string" && payload.message.length > 0
+      ? payload.message
+      : "Something went wrong. Please try again.";
+
+  return { ok: false, status: response.status, message };
+}
+
 export function loginRequest(email: string, password: string) {
   return postAuth("/api/auth/login", { email, password });
 }

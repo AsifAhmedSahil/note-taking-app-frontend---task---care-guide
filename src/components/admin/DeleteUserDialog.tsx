@@ -2,23 +2,23 @@
 
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
-type DeleteNoteDialogProps = {
+type DeleteUserDialogProps = {
   open: boolean;
   onClose: () => void;
   onConfirm: () => Promise<string | null>;
 };
 
-export function DeleteNoteDialog({
+export function DeleteUserDialog({
   open,
   onClose,
   onConfirm,
-}: DeleteNoteDialogProps) {
+}: DeleteUserDialogProps) {
   return (
     <ConfirmDialog
       open={open}
       onClose={onClose}
       onConfirm={onConfirm}
-      title="Delete note?"
+      title="Delete user?"
       description="This action cannot be undone."
       confirmLabel="Delete"
       busyLabel="Deleting…"
