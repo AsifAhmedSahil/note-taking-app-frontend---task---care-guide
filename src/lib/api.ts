@@ -404,11 +404,20 @@ type NotesResponsePayload = {
 export async function getNotes(
   token: string,
   page = 1,
-  limit = 10
+  limit = 10,
+  search = ""
 ): Promise<GetNotesResult> {
+  const params = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+  });
+  if (search.trim()) {
+    params.set("search", search.trim());
+  }
+
   let response: Response;
   try {
-    response = await fetch(`/api/notes?page=${page}&limit=${limit}`, {
+    response = await fetch(`/api/notes?${params.toString()}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
   } catch {

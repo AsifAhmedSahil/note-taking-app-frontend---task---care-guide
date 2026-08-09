@@ -1,6 +1,8 @@
 "use client";
 
-import { IconMenu, IconSearch } from "@/components/icons";
+import { Suspense } from "react";
+import { IconMenu } from "@/components/icons";
+import { SearchInput } from "@/components/app/SearchInput";
 import { useAuth } from "@/lib/auth";
 
 type AppHeaderProps = {
@@ -33,14 +35,9 @@ export function AppHeader({ onMenuClick }: AppHeaderProps) {
         My Notes
       </h1>
       <div className="ml-auto flex items-center gap-3">
-        <div className="relative hidden sm:block">
-          <IconSearch className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
-          <input
-            type="text"
-            placeholder="Search notes"
-            className="h-9 w-56 rounded-control border border-border bg-background pl-9 pr-3 text-sm text-foreground placeholder:text-muted focus:outline-none focus:ring-2 focus:ring-accent/30"
-          />
-        </div>
+        <Suspense fallback={null}>
+          <SearchInput />
+        </Suspense>
         <div className="flex items-center gap-2.5">
           <div
             className="flex h-9 w-9 items-center justify-center rounded-full bg-accent/10 text-sm font-medium text-accent"

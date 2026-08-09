@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { AppShell } from "@/components/app/AppShell";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -16,6 +16,8 @@ const PAGE_SIZE = 10;
 
 function DashboardContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const search = searchParams.get("search") ?? "";
   const { token, logout } = useAuth();
   const [notes, setNotes] = useState<Note[]>([]);
   const [pagination, setPagination] = useState<NotesPagination>({
@@ -28,13 +30,20 @@ function DashboardContent() {
   const [reloadKey, setReloadKey] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [prevSearch, setPrevSearch] = useState(search);
+
+  if (prevSearch !== search) {
+    setPrevSearch(search);
+    setPage(1);
+    setLoading(true);
+  }
 
   useEffect(() => {
     if (!token) return;
 
     let cancelled = false;
 
-    getNotes(token, page, PAGE_SIZE)
+    getNotes(token, page, PAGE_SIZE, search)
       .then((result) => {
         if (cancelled) return;
         if (result.ok) {
@@ -62,7 +71,7 @@ function DashboardContent() {
     return () => {
       cancelled = true;
     };
-  }, [token, page, reloadKey, logout, router]);
+  }, [token, page, search, reloadKey, logout, router]);
 
   const handlePageChange = (nextPage: number) => {
     setPage(nextPage);
@@ -73,6 +82,10 @@ function DashboardContent() {
     setError(null);
     setLoading(true);
     setReloadKey((key) => key + 1);
+  };
+
+  const clearSearch = () => {
+    router.replace("/");
   };
 
   if (loading) {
@@ -101,17 +114,30 @@ function DashboardContent() {
   if (notes.length === 0) {
     return (
       <AppShell>
-        <EmptyState
-          icon={<IconNote className="h-6 w-6 text-muted" />}
-          title="No notes yet"
-          description="Create your first note to get started."
-          action={
-            <Button onClick={() => router.push("/notes/new")}>
-              <IconPlus className="h-4 w-4" />
-              New Note
-            </Button>
-          }
-        />
+        {search.trim() ? (
+          <EmptyState
+            icon={<IconNote className="h-6 w-6 text-muted" />}
+            title="No notes found"
+            description={`No notes match "${search.trim()}". Try a different search.`}
+            action={
+              <Button variant="secondary" onClick={clearSearch}>
+                Clear search
+              </Button>
+            }
+          />
+        ) : (
+          <EmptyState
+            icon={<IconNote className="h-6 w-6 text-muted" />}
+            title="No notes yet"
+            description="Create your first note to get started."
+            action={
+              <Button onClick={() => router.push("/notes/new")}>
+                <IconPlus className="h-4 w-4" />
+                New Note
+              </Button>
+            }
+          />
+        )}
       </AppShell>
     );
   }
@@ -119,6 +145,21 @@ function DashboardContent() {
   return (
     <AppShell>
       <div className="mx-auto w-full max-w-3xl px-4 py-8 md:px-8">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h1 className="text-base font-semibold tracking-tight text-foreground">
+              {search.trim() ? `Search results for "${search.trim()}"` : "All Notes"}
+            </h1>
+            <p className="mt-0.5 text-sm text-muted">
+              {pagination.total} {pagination.total === 1 ? "note" : "notes"}
+            </p>
+          </div>
+          {search.trim() ? (
+            <Button variant="secondary" onClick={clearSearch}>
+              Clear search
+            </Button>
+          ) : null}
+        </div>
         <NotesList
           notes={notes}
           pagination={pagination}
@@ -133,7 +174,9 @@ function DashboardContent() {
 export default function HomePage() {
   return (
     <RequireAuth>
-      <DashboardContent />
+      <Suspense fallback={null}>
+        <DashboardContent />
+      </Suspense>
     </RequireAuth>
   );
 }
