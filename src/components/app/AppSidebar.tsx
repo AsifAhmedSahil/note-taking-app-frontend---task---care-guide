@@ -1,7 +1,9 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Logo } from "@/components/ui/Logo";
+import { useAuth } from "@/lib/auth";
 import {
   IconClose,
   IconLogout,
@@ -14,12 +16,14 @@ type NavItemProps = {
   icon: React.ReactNode;
   label: string;
   active?: boolean;
+  onClick?: () => void;
 };
 
-function NavItem({ icon, label, active = false }: NavItemProps) {
+function NavItem({ icon, label, active = false, onClick }: NavItemProps) {
   return (
     <button
       type="button"
+      onClick={onClick}
       className={`flex w-full items-center gap-3 rounded-control px-3 py-2 text-sm font-medium transition-colors ${
         active
           ? "bg-muted/10 text-foreground"
@@ -38,6 +42,14 @@ type AppSidebarProps = {
 };
 
 export function AppSidebar({ open, onClose }: AppSidebarProps) {
+  const router = useRouter();
+  const { logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    router.replace("/login");
+  };
+
   return (
     <>
       {open ? (
@@ -77,8 +89,15 @@ export function AppSidebar({ open, onClose }: AppSidebarProps) {
           />
         </nav>
         <div className="flex flex-col gap-1 border-t border-border px-3 py-4">
-          <NavItem icon={<IconSettings className="h-4 w-4" />} label="Settings" />
-          <NavItem icon={<IconLogout className="h-4 w-4" />} label="Logout" />
+          <NavItem
+            icon={<IconSettings className="h-4 w-4" />}
+            label="Settings"
+          />
+          <NavItem
+            icon={<IconLogout className="h-4 w-4" />}
+            label="Logout"
+            onClick={handleLogout}
+          />
         </div>
       </aside>
     </>
