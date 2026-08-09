@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AppShell } from "@/components/app/AppShell";
 import { Button } from "@/components/ui/Button";
@@ -31,6 +31,7 @@ function DashboardContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [prevSearch, setPrevSearch] = useState(search);
+  const [sortOrder, setSortOrder] = useState<"recent" | "oldest">("recent");
 
   if (prevSearch !== search) {
     setPrevSearch(search);
@@ -88,6 +89,16 @@ function DashboardContent() {
     router.replace("/");
   };
 
+  const sortedNotes = useMemo(() => {
+    if (sortOrder === "oldest") {
+      return [...notes].sort(
+        (a, b) =>
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      );
+    }
+    return notes;
+  }, [notes, sortOrder]);
+
   if (loading) {
     return (
       <AppShell>
@@ -129,11 +140,11 @@ function DashboardContent() {
           <EmptyState
             icon={<IconNote className="h-6 w-6 text-muted" />}
             title="No notes yet"
-            description="Create your first note to get started."
+            description="Create your first note and it will appear here."
             action={
               <Button onClick={() => router.push("/notes/new")}>
                 <IconPlus className="h-4 w-4" />
-                New Note
+                Create your first note
               </Button>
             }
           />
@@ -144,14 +155,18 @@ function DashboardContent() {
 
   return (
     <AppShell>
-      <div className="mx-auto w-full max-w-5xl px-4 py-8 md:px-8">
-        <div className="mb-7 flex flex-wrap items-center justify-between gap-3">
+      <div className="mx-auto w-full max-w-6xl px-4 pb-10 pt-6 md:px-8">
+        <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
           <div className="min-w-0">
             <h1 className="text-2xl font-semibold tracking-tight text-foreground">
               {search.trim() ? `Search results for "${search.trim()}"` : "All Notes"}
             </h1>
-            <p className="mt-1.5 text-sm text-muted">
-              {pagination.total} {pagination.total === 1 ? "note" : "notes"}
+            <p className="mt-1 text-sm text-muted">
+              {search.trim()
+                ? `${pagination.total} ${pagination.total === 1 ? "match" : "matches"}`
+                : `${pagination.total} ${
+                    pagination.total === 1 ? "note" : "notes"
+                  } · Recently updated`}
             </p>
           </div>
           {search.trim() ? (
@@ -160,8 +175,30 @@ function DashboardContent() {
             </Button>
           ) : null}
         </div>
+
+        <div className="mt-5 mb-6 flex flex-wrap items-center justify-between gap-3">
+          <label htmlFor="sort-order" className="sr-only">
+            Sort notes
+          </label>
+          <select
+            id="sort-order"
+            value={sortOrder}
+            onChange={(e) =>
+              setSortOrder(e.target.value as "recent" | "oldest")
+            }
+            className="h-9 cursor-pointer rounded-control border border-border bg-surface px-3 text-sm text-foreground shadow-sm transition-colors focus:border-accent/40 focus:outline-none focus:ring-2 focus:ring-accent/30"
+          >
+            <option value="recent">Newest first</option>
+            <option value="oldest">Oldest first</option>
+          </select>
+          <Button onClick={() => router.push("/notes/new")}>
+            <IconPlus className="h-4 w-4" />
+            New Note
+          </Button>
+        </div>
+
         <NotesList
-          notes={notes}
+          notes={sortedNotes}
           pagination={pagination}
           currentPage={page}
           onPageChange={handlePageChange}

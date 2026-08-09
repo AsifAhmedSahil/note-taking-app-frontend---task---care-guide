@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { IconClock } from "@/components/icons";
 import type { Note } from "@/lib/api";
 import { getNoteColor } from "@/lib/noteColors";
 
@@ -39,10 +40,15 @@ export function NoteListItem({ note }: NoteListItemProps) {
     <Link
       href={`/notes/${note.id}`}
       style={{ backgroundColor: color.bg, borderColor: color.border }}
-      className="group flex h-full flex-col gap-3 rounded-[16px] border p-5 shadow-card transition-all duration-200 hover:-translate-y-0.5 hover:shadow-card-hover hover:border-foreground/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+      className="group relative flex h-full min-h-48 flex-col gap-3 overflow-hidden rounded-[18px] border p-5 shadow-card transition-all duration-200 hover:-translate-y-1 hover:border-foreground/20 hover:shadow-card-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
     >
+      <span
+        aria-hidden="true"
+        className="absolute inset-x-0 top-0 h-[3px]"
+        style={{ backgroundColor: color.accent }}
+      />
       <div className="flex items-start justify-between gap-2">
-        <h3 className="min-w-0 flex-1 break-words text-base font-semibold leading-snug tracking-tight text-foreground transition-colors group-hover:text-foreground line-clamp-2">
+        <h3 className="min-w-0 flex-1 break-words text-base font-semibold leading-snug tracking-tight text-foreground line-clamp-2">
           {note.title}
         </h3>
         <svg
@@ -59,11 +65,15 @@ export function NoteListItem({ note }: NoteListItemProps) {
           <path d="m13 6 6 6-6 6" />
         </svg>
       </div>
-      <p className="line-clamp-2 flex-1 break-words text-sm leading-relaxed text-muted">
+      <p className="line-clamp-3 flex-1 break-words text-sm leading-relaxed text-muted">
         {note.content}
       </p>
       <div className="flex items-center justify-between gap-3 border-t border-border/60 pt-3">
-        <time dateTime={note.createdAt} className="shrink-0 text-xs text-muted">
+        <time
+          dateTime={note.createdAt}
+          className="flex shrink-0 items-center gap-1.5 text-xs text-muted"
+        >
+          <IconClock className="h-3.5 w-3.5" />
           {formatDate(note.createdAt)}
         </time>
       </div>
