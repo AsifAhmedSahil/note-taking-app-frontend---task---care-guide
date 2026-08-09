@@ -43,12 +43,13 @@ function NewNoteContent() {
           <Button variant="ghost" onClick={handleBack}>
             ← Back
           </Button>
-          <h1 className="text-lg font-semibold tracking-tight text-foreground">
+          <h1 className="text-lg font-semibold tracking-tight text-foreground ">
             New Note
           </h1>
           <span className="w-[60px]" />
         </div>
         <NoteEditor
+        
           submitLabel="Save Note"
           onCancel={handleBack}
           onSubmit={handleSubmit}

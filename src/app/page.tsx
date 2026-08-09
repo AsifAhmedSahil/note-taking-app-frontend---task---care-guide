@@ -158,7 +158,7 @@ function DashboardContent() {
       <div className="mx-auto w-full max-w-6xl px-4 pb-10 pt-6 md:px-8">
         <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
           <div className="min-w-0">
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+            <h1 className="text-2xl font-semibold tracking-tight text-foreground ">
               {search.trim() ? `Search results for "${search.trim()}"` : "All Notes"}
             </h1>
             <p className="mt-1 text-sm text-muted">
@@ -191,7 +191,8 @@ function DashboardContent() {
             <option value="recent">Newest first</option>
             <option value="oldest">Oldest first</option>
           </select>
-          <Button onClick={() => router.push("/notes/new")}>
+          <Button onClick={() => router.push("/notes/new")} className="cursor-pointer">
+            
             <IconPlus className="h-4 w-4" />
             New Note
           </Button>

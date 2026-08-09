@@ -103,14 +103,15 @@ export function AppSidebar({ open, onClose }: AppSidebarProps) {
           </button>
         </div>
         <div className="px-3 pt-2">
-          <Button className="w-full" onClick={() => router.push("/notes/new")}>
+          <Button className="w-full cursor-pointer" onClick={() => router.push("/notes/new")} >
             <IconPlus className="h-4 w-4" />
             New Note
           </Button>
         </div>
         <nav className="mt-6 flex flex-1 flex-col gap-1 px-3">
           <NavItem
-            icon={<IconNote className="h-4 w-4" />}
+       
+            icon={<IconNote className="h-4 w-4 cursor-pointer" />}
             label="All Notes"
             active={isNotesActive}
             onClick={() => handleNavigate("/")}

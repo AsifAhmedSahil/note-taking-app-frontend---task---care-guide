@@ -4,11 +4,22 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AppShell } from "@/components/app/AppShell";
 import { Button } from "@/components/ui/Button";
+import { IconTrash } from "@/components/icons";
 import { NoteEditor } from "@/components/notes/NoteEditor";
 import { DeleteNoteDialog } from "@/components/notes/DeleteNoteDialog";
 import { getNote, updateNote, deleteNote } from "@/lib/api";
 import type { Note, NoteInput } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
+
+function formatDateTime(value: string): string {
+  return new Date(value).toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
 
 type NoteDetailProps = {
   noteId: string;
@@ -116,7 +127,7 @@ export function NoteDetail({ noteId }: NoteDetailProps) {
   if (state.kind === "error") {
     return (
       <AppShell>
-        <div className="mx-auto w-full max-w-3xl px-4 py-8 md:px-8">
+        <div className="mx-auto w-full max-w-4xl px-4 py-6 md:px-8 md:py-10">
           <div className="flex flex-col items-start gap-4">
             <p className="text-sm text-muted">{state.message}</p>
             <div className="flex items-center gap-3">
@@ -145,7 +156,7 @@ export function NoteDetail({ noteId }: NoteDetailProps) {
           </p>
           <Button
             variant="secondary"
-            className="mt-2"
+            className="mt-2 cursor-pointer"
             onClick={() => router.replace("/")}
           >
             Back to notes
@@ -159,55 +170,66 @@ export function NoteDetail({ noteId }: NoteDetailProps) {
 
   return (
     <AppShell>
-      <div className="mx-auto w-full max-w-3xl px-4 py-8 md:px-8">
+      <div className="mx-auto w-full max-w-4xl px-4 py-6 md:px-8 md:py-10">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-          <Button variant="ghost" onClick={handleBack}>
-            ← Back
+          <Button variant="ghost" onClick={handleBack} className="cursor-pointer">
+            ← Back to Notes
           </Button>
           {editing ? (
             <span className="inline-flex items-center rounded-full bg-accent/10 px-3 py-1 text-xs font-medium text-accent">
               Editing note
             </span>
           ) : (
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <Button variant="secondary" onClick={() => setDeleteOpen(true)}>
+                <IconTrash className="h-4 w-4" />
                 Delete
               </Button>
-              <Button onClick={() => setEditing(true)}>Edit</Button>
+              <Button onClick={() => setEditing(true)}>
+                Edit
+              </Button>
             </div>
           )}
         </div>
 
         {editing ? (
-          <NoteEditor
-            initialTitle={note.title}
-            initialContent={note.content}
-            submitLabel="Save Changes"
-            onCancel={() => setEditing(false)}
-            onSubmit={handleEditSubmit}
-          />
+          <div className="rounded-[18px] border border-border bg-surface p-6 shadow-card transition-shadow sm:p-8">
+            <NoteEditor
+              initialTitle={note.title}
+              initialContent={note.content}
+              submitLabel="Save Changes"
+              onCancel={() => setEditing(false)}
+              onSubmit={handleEditSubmit}
+            />
+          </div>
         ) : (
-          <article>
-            <h1 className="text-xl font-semibold tracking-tight text-foreground">
-              {note.title}
-            </h1>
-            <time
-              dateTime={note.updatedAt}
-              className="mt-1.5 block text-xs text-muted"
-            >
-              Updated{" "}
-              {new Date(note.updatedAt).toLocaleString("en-US", {
-                month: "short",
-                day: "numeric",
-                year: "numeric",
-                hour: "numeric",
-                minute: "2-digit",
-              })}
-            </time>
-            <div className="mt-6 border-b border-border" />
-            <p className="mt-6 whitespace-pre-wrap break-words text-sm leading-relaxed text-foreground">
+          <article className="rounded-[18px] border border-border bg-surface px-5 py-8 shadow-card transition-shadow hover:shadow-card-hover sm:px-10 sm:py-10">
+            <header>
+              <h1 className="break-words text-2xl font-semibold tracking-tight text-foreground">
+                {note.title}
+              </h1>
+              <time
+                dateTime={note.updatedAt}
+                className="mt-2 block text-sm text-muted"
+              >
+                Updated {formatDateTime(note.updatedAt)}
+              </time>
+            </header>
+            <div className="my-6 border-t border-border sm:my-7" />
+            <p className="break-words whitespace-pre-wrap text-[16px] leading-[1.8] text-foreground">
               {note.content}
             </p>
+            <dl className="mt-8 flex flex-col gap-5 border-t border-border pt-6 sm:mt-10 sm:flex-row sm:gap-12">
+              <div>
+                <dt className="text-xs font-medium uppercase tracking-wide text-muted">
+                  Created
+                </dt>
+                <dd className="mt-1 text-sm text-foreground">
+                  {formatDateTime(note.createdAt)}
+                </dd>
+              </div>
+              
+            </dl>
           </article>
         )}
 
